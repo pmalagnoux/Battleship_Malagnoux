@@ -69,7 +69,7 @@ public class Boat {
 	}
 
 
-	public boolean isTouch(int[] gridPos){
+	public boolean isTouch(int[] gridPos){ //Pas sécurisé si il touche un endroit déjà touché 
 		for(int[] position : positions){
 			if(Arrays.equals(position, gridPos)){
 				this.touch ++;

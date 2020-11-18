@@ -43,7 +43,10 @@ public class Joueur {
 	public void setBoat(String pos, int length, boolean direction) {
 		int[] gridPos = gridPosition(pos);
 		if(isBoatValid(pos, length, direction)){
-			boatList.add(boatList.size(), new Boat(gridPos,direction, length));
+			boatList.add(new Boat(gridPos,direction, length));
+			for(int[] position : boatList.get(boatList.size()-1).getPositions()){
+				this.ownGrid[position[0]][position[1]] = 1 ;
+			}
 		}
 
 		
