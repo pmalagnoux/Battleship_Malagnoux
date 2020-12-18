@@ -21,7 +21,6 @@ public class Client1 {
 		} catch(Exception e) {
 			// Traitement d'erreur
 		}
-
 	}
 }
 

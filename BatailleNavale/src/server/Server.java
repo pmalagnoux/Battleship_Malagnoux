@@ -16,12 +16,11 @@ public class Server {
 				new ThreadBataille(client1, client2).start();
 				}
 			}
-			
-			
-			
-		
+
 		catch(Exception e){
-			
+		
 		}
+	
 	}
 }
+//Il y a une inversion dans les directions

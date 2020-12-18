@@ -16,6 +16,7 @@ public class Boat {
 		this.length = length;
 		this.direction = direction;
 		this.name = nameAboat(length);
+		this.positions = new int[length][2];
 		setBoatPositions(gridPos);
 	}
 
@@ -47,16 +48,19 @@ public class Boat {
 		return name;
 	}
 
-	public void setBoatPositions(int[] gridPos){ // A mettre en static ???
+	public void setBoatPositions(int[] gridPos){
 		
 		if(this.direction){ //Horizontal
 				for(int i = 0; i< this.length ; i++){
-					this.positions[i] = new int[]{gridPos[0], i + gridPos[1]};
+					this.positions[i][0] = gridPos[0];
+					this.positions[i][1] = i + gridPos[1];
 			}
 		}
 		else{
 			for(int i = 0; i< this.length ; i++){
-				this.positions[i] = new int[]{i + gridPos[0], gridPos[1]};
+				this.positions[i][0] = gridPos[0] + i;
+				this.positions[i][1] = gridPos[1];
+				
 			}
 		}
 	}
@@ -69,13 +73,12 @@ public class Boat {
 	}
 
 
-	public boolean isTouch(int[] gridPos){ //Pas sécurisé si il touche un endroit déjà touché 
+	public boolean isTouch(int[] gridPos){ 
 		for(int[] position : positions){
 			if(Arrays.equals(position, gridPos)){
 				this.touch ++;
 				isSunk();
 				return true;
-				//break; //peut on brak ici comme on a pas besoin d'aller plus loin ?
 			}
 		}
 		return false;
@@ -130,19 +133,19 @@ public class Boat {
 	public void setSunk(boolean sunk) {
 		this.sunk = sunk;
 	}
-
-	
-
-
-
-
-
-
-
-
-
-
-
-
-
+	public boolean getSunk() {
+		return this.sunk;
+	}
+	public static void main(String[] args) {
+		Boat a = new Boat(new int[]{2,2}, true, 5);
+		for(int[]pos : a.getPositions()) {
+			System.out.println(pos[0] + " " + pos[1]);
+		}
+		Boat b = new Boat(new int[]{2,2}, false, 5);
+		for(int[]pos : b.getPositions()) {
+			System.out.println(pos[0] + " " + pos[1]);
+		}
+		System.out.println(a.isTouch(new int[] {2,5}));
+		System.out.println(a.isTouch(new int[] {2,6}));
+	}
 }
