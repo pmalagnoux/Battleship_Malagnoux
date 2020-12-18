@@ -23,4 +23,3 @@ public class Server {
 	
 	}
 }
-//Il y a une inversion dans les directions

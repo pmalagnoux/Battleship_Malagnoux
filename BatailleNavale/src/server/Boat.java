@@ -3,7 +3,7 @@ package server;
 import java.util.Arrays;
 
 public class Boat {
-	private int[][] positions; //Achanger surement pas possible
+	private int[][] positions;
 	private boolean direction; //True pour Horizontal False pour Vertical
 	private int touch = 0;
 	private boolean sunk = false;
@@ -136,16 +136,5 @@ public class Boat {
 	public boolean getSunk() {
 		return this.sunk;
 	}
-	public static void main(String[] args) {
-		Boat a = new Boat(new int[]{2,2}, true, 5);
-		for(int[]pos : a.getPositions()) {
-			System.out.println(pos[0] + " " + pos[1]);
-		}
-		Boat b = new Boat(new int[]{2,2}, false, 5);
-		for(int[]pos : b.getPositions()) {
-			System.out.println(pos[0] + " " + pos[1]);
-		}
-		System.out.println(a.isTouch(new int[] {2,5}));
-		System.out.println(a.isTouch(new int[] {2,6}));
-	}
+
 }

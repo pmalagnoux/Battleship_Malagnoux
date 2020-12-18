@@ -5,13 +5,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Random;
 
 public class ThreadBataille extends Thread {
 	BufferedReader in1;
 	PrintWriter out1;
 	BufferedReader in2;
 	PrintWriter out2;
-
+	Joueur j1;
+	Joueur j2;
 	
 	public ThreadBataille(Socket client1, Socket client2) {
 		try {
@@ -20,7 +22,8 @@ public class ThreadBataille extends Thread {
 		this.in2 = new BufferedReader(new InputStreamReader(client2.getInputStream()));
 		this.out1 = new PrintWriter(client1.getOutputStream(), true);
 		this.out2 = new PrintWriter(client2.getOutputStream(), true);
-	
+		this.j1 = new Joueur();
+		this.j2 = new Joueur();
 		}
 		catch(Exception e) {}
 	}
@@ -30,100 +33,71 @@ public class ThreadBataille extends Thread {
 		//A déplacer dans Partie
 		try {
 			boolean partie = true;
-			boolean tour = true; //true J1 commence false J2 commence
-			Joueur j1 = new Joueur();
-			Joueur j2 = new Joueur();
+			boolean tour = new Random().nextBoolean(); //true J1 commence false J2 commence
+			
+			ThreadPlacement placementJoueur1 = new ThreadPlacement(j1, in1, out1);
+			ThreadPlacement placementJoueur2 = new ThreadPlacement(j2, in2, out2);
+			placementJoueur1.start();
+			placementJoueur2.start();
+			
 			while(partie){
-				//PLACEMENT DES BATEAUX
-				while(j1.getBoatListAplacer().size() !=0 || j2.getBoatListAplacer().size() !=0 ){
-					if(j1.getBoatListAplacer().size() !=0){
-						try {
-						out1.println(ThreadBataille.printGrid(j1.getOwnGrid()));
-						out1.println("Veuillez rentrer une position pour placer le bateau : " + j1.getBoatListAplacer().get(0).toString());
-						String p1 = in1.readLine();
-						out1.println("Veuillez rentrer une direction pour placer le bateau (true pour horizontal / false pour vertical (choix par défaut)) :");
-						Boolean d1 = Boolean.parseBoolean(in1.readLine());
-						if(j1.setBoat(p1,j1.getBoatListAplacer().get(0).getLength(), d1)) j1.DeleteBoatAplacer();
+				if(!placementJoueur1.isAlive() && !placementJoueur2.isAlive()) {
+					
+					afficher(j1, out1); //Envoie des grilles aux Joueurs
+					afficher(j2, out2);
+					
+					if(tour) {
 						
-						}
-						catch(Exception e) {
-							out1.println("Données invalides bateau non placé");
-						}
+						partie = tour(j1,j2,in1,out1,out2);
 					}
-					if(j2.getBoatListAplacer().size() !=0){
-						try {
-							out2.println(ThreadBataille.printGrid(j2.getOwnGrid()));
-							out2.println("Veuillez rentrer une position pour placer le bateau : " + j2.getBoatListAplacer().get(0).toString());
-							String p2 = in2.readLine();
-							out2.println("Veuillez rentrer une direction pour placer le bateau (true pour horizontal / false pour vertical (choix par défaut)) :");
-							Boolean d2 = Boolean.parseBoolean(in2.readLine());
-							if(j2.setBoat(p2,j2.getBoatListAplacer().get(0).getLength(), d2)) j2.DeleteBoatAplacer();
-							
-							}
-							catch(Exception e) {
-								out2.println("Données invalides bateau non placé");
-							}
+					else {
+						partie = tour(j2,j1,in2,out2,out1);
 					}
-				}
-				//PARTIE
-				out1.println("Ma grille !!");
-				out1.println(ThreadBataille.printGrid(j1.getOwnGrid()));
-				out1.println("Grille des tirs!!");
-				out1.println(ThreadBataille.printGrid(j1.getGuessGrid()));
-				out2.println("Ma grille !!");
-				out2.println(ThreadBataille.printGrid(j2.getOwnGrid()));
-				out2.println("Grille des tirs!!");
-				out2.println(ThreadBataille.printGrid(j2.getGuessGrid()));
-				
-				if(tour) { //Tour du joueur 1
 					tour = !tour;//Changement de joueur
-					out1.println("Entrez une position à tester");
-					String posTir1 = in1.readLine();
-					boolean[] shoot1 = j2.getShoot(posTir1);
-					while(!(shoot1[0])) {
-						out1.println("Position invalide entrez à nouveau une position à tester : ");
-						posTir1 = in1.readLine();
-						shoot1 = j2.getShoot(posTir1);
-					}
-					j1.shoot(posTir1, shoot1[1]);
-					if (shoot1[1]) {
-						if(shoot1[2]) out1.println("Touché Coulé !!!");
-						else out1.println("Touché !!!");
-					}
-					else  out1.println("Manqué");
-					if(j2.isLoose()) {
-						partie = false;
-						out1.println("Partie terminé Vous avez gagné");
-						out2.println("Partie terminé Vous avez perdu");
-					}	
-				}
-				else {
-					tour = !tour;//Changement de joueur
-					out2.println("Entrez une position à tester");
-					String posTir2 = in2.readLine();
-					boolean[] shoot2 = j1.getShoot(posTir2);
-					while(!(shoot2[0])) {
-						out2.println("Position invalide entrez à nouveau une position à tester : ");
-						posTir2 = in2.readLine();
-						shoot2 = j1.getShoot(posTir2);
-					}
-					j2.shoot(posTir2, shoot2[1]);
-					if (shoot2[1]) {
-						if(shoot2[2]) out2.println("Touché Coulé !!!");
-						else out2.println("Touché !!!");
-					}
-					else  out2.println("Manqué");
-					if(j1.isLoose()) {
-						partie = false;
-						out2.println("Partie terminé Vous avez gagné");
-						out1.println("Partie terminé Vous avez perdu");
-					}	
 				}
 			}
 		}catch (Exception e) {
 			System.out.println("Connexion interrompu");
 		}
 	}
+	public boolean tour(Joueur Attaquant, Joueur Receveur, BufferedReader inA, PrintWriter outA, PrintWriter outR ){
+		
+		try{
+			outA.println("Entrez une position à tester");
+			String posTir = inA.readLine();
+			boolean[] shoot = Receveur.getShoot(posTir);
+			while(!(shoot[0])) {
+				outA.println("Position invalide entrez à nouveau une position à tester : ");
+				posTir = inA.readLine();
+				shoot = Receveur.getShoot(posTir);
+			}
+			Attaquant.shoot(posTir, shoot[1]);
+			if (shoot[1]) {
+				if(shoot[2]) outA.println("Touché Coulé !!!");
+				else outA.println("Touché !!!");
+			}
+			else  outA.println("Manqué");
+			if(Receveur.isLoose()) {
+				
+				outA.println("Partie terminé Vous avez gagné");
+				outR.println("Partie terminé Vous avez perdu");
+				return false;
+			}
+		}
+		catch(Exception e){
+			
+		}
+		return true;
+	}
+
+	public void afficher(Joueur j, PrintWriter out) {
+		out.println("Ma grille !!");
+		out.println(ThreadBataille.printGrid(j.getOwnGrid()));
+		out.println("Grille des tirs!!");
+		out.println(ThreadBataille.printGrid(j.getGuessGrid()));
+
+	}
+	
 	public static String printGrid(char[][] grid) {
 		char[] letters = {'A','B','C','D','E','F','G','H','I','J'};
 		char[] figures = {'X','0','1','2','3','4','5','6','7','8','9'};

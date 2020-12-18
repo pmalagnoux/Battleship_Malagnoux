@@ -73,7 +73,7 @@ public class Joueur {
 	public boolean isBoatValid(String pos, int length, boolean direction){
 		int[] gridPos = gridPosition(pos);
 		if(direction){
-			if (gridPos[1] <= ownGrid.length - length) { //Tester si il faut bien le -1 ou pas
+			if (gridPos[1] <= ownGrid.length - length) {
 				for(Boat boat : this.boatList) {
 					for(int[] position : boat.getPositions()){
 						if(Arrays.equals(position, gridPos)){
@@ -100,24 +100,24 @@ public class Joueur {
 	}
 	public boolean[] getShoot(String pos) { //Retourne un bool {isValid, isTouch, isSunk}
 		int[] gridPos = gridPosition(pos);
-		if (gridPos == null) {
+		if (gridPos == null) {// si pos non valide
 			return new boolean[]{false,false,false};
 		}
-		if ((this.ownGrid[gridPos[0]][gridPos[1]] != 2 && this.ownGrid[gridPos[0]][gridPos[1]] != 3)) {
+		if ((this.ownGrid[gridPos[0]][gridPos[1]] != 2 && this.ownGrid[gridPos[0]][gridPos[1]] != 3)) {//Si pos valide et non touché ou coulé.
 			for(Boat boat : boatList) {
-				if (boat.isTouch(gridPos)) {
+				if (boat.isTouch(gridPos)) {//Si touché
 					this.ownGrid[gridPos[0]][gridPos[1]] = 3;
-					if(boat.getSunk()) {
+					if(boat.getSunk()) {//Si coulé
 						return new boolean[]{true, true, true};
 					}
 					
-					else {
+					else {// Si non coulé
 						return new boolean[]{true, true, false};
 					}
 				}
 			}
 			this.ownGrid[gridPos[0]][gridPos[1]] = 2;
-			return new boolean[]{true, false,false};
+			return new boolean[]{true, false,false};//pos valide mais pas touché
 		}
 		
 		
@@ -178,42 +178,4 @@ public class Joueur {
 		this.boatListAplacer = boatListAplacer;
 	}
 	
-	public static String printGrid(char[][] grid) {
-		char[] letters = {'X','A','B','C','D','E','F','G','H','I','J'};
-		char[] figures = {'0','1','2','3','4','5','6','7','8','9'};
-		String message = "";
-		String Newligne=System.getProperty("line.separator");
-		for (int i = 0; i < grid.length+1; i++) {
-			message += Newligne;
-			if(i == 0) {
-				for (int j = 0; j < letters.length; j++) {
-					message += (letters[j] + " ");
-				}
-				
-			}
-			else {
-				for (int j = 0; j < grid[0].length+1; j++) {
-					if(j == 0) {
-						message += (figures[i-1] + " ");
-					}
-					else {
-						if (grid[i-1][j-1] == 0) message += ("_"+ " ");
-						else if(grid[i-1][j-1] == 1) message += ("B"+ " ");
-						else if(grid[i-1][j-1] == 2) message += ("O" + " ");
-						else message += ("X" + " ");
-					}
-				}
-			}
-			
-		}
-		return message;
-	}
-	
-	/*
-	public static void main(String[] args) {
-		Joueur j1 = new Joueur();
-		System.out.println(j1.setBoat("A2", 5, true));
-		
-	}
-	*/
 }
